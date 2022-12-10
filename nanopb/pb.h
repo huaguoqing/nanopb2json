@@ -323,6 +323,12 @@ struct pb_msgdesc_s {
     pb_size_t field_count;
     pb_size_t required_field_count;
     pb_size_t largest_tag;
+
+#ifdef PB_SUPPORT_JSON    
+    /*huaguoqing add,2022.1010*/
+    const char * const * field_name_info;
+    const char *name;
+#endif    
 };
 
 /* Iterator for message descriptor */
@@ -493,6 +499,26 @@ struct pb_extension_s {
 /* Force expansion of macro value */
 #define PB_EXPAND(x) x
 
+#ifdef PB_SUPPORT_JSON 
+/*huaguoqing add,2022.12.10*/
+#define HUA_PB_FIELD_NAME_LIST(msgname, structname, width) \
+    const const char* structname ## _field_name_info[] = \
+    { \
+        msgname ## _FIELD_NAME_LIST(PB_GEN_FIELD_INFO_ ## width, structname) \
+        NULL \
+    };
+
+#define HUA_PB_FIELD_NAME_ADD(msgname, structname, width) \
+       structname ## _field_name_info,\
+       #msgname
+#else
+
+#define HUA_PB_FIELD_NAME_LIST(msgname, structname, width)
+#define HUA_PB_FIELD_NAME_ADD(msgname, structname, width)
+
+#endif
+
+
 /* Binding of a message field set into a specific structure */
 #define PB_BIND(msgname, structname, width) \
     const uint32_t structname ## _field_info[] PB_PROGMEM = \
@@ -500,6 +526,9 @@ struct pb_extension_s {
         msgname ## _FIELDLIST(PB_GEN_FIELD_INFO_ ## width, structname) \
         0 \
     }; \
+    \
+    HUA_PB_FIELD_NAME_LIST(msgname, structname, width) \
+    \
     const pb_msgdesc_t* const structname ## _submsg_info[] = \
     { \
         msgname ## _FIELDLIST(PB_GEN_SUBMSG_INFO, structname) \
@@ -514,6 +543,8 @@ struct pb_extension_s {
        0 msgname ## _FIELDLIST(PB_GEN_FIELD_COUNT, structname), \
        0 msgname ## _FIELDLIST(PB_GEN_REQ_FIELD_COUNT, structname), \
        0 msgname ## _FIELDLIST(PB_GEN_LARGEST_TAG, structname), \
+       \
+       HUA_PB_FIELD_NAME_ADD(msgname, structname, width) \
     }; \
     msgname ## _FIELDLIST(PB_GEN_FIELD_INFO_ASSERT_ ## width, structname)
 

@@ -1479,6 +1479,29 @@ class Message(ProtoElement):
 
         return result
 
+	#huaguoqing add,2022.10.10 for nanopb2json
+    def fields_name_declaration(self, dependencies):
+        '''Return X-macro declaration of all fields in this message.'''
+        Field.macro_x_param = 'X'
+        Field.macro_a_param = 'a'
+        while any(field.name == Field.macro_x_param for field in self.all_fields()):
+            Field.macro_x_param += '_'
+        while any(field.name == Field.macro_a_param for field in self.all_fields()):
+            Field.macro_a_param += '_'
+
+        # Field descriptor array must be sorted by tag number, pb_common.c relies on it.
+        sorted_fields = list(self.all_fields())
+        sorted_fields.sort(key = lambda x: x.tag)
+
+        result = '#define %s_FIELD_NAME_LIST(%s, %s) \\\n' % (
+            Globals.naming_style.define_name(self.name),
+            Field.macro_x_param,
+            Field.macro_a_param)
+        result += ' \\\n'.join('\"'+x.name+'\",' for x in sorted_fields)
+        result += '\n'
+
+        return result
+
     def enumtype_defines(self):
         '''Defines to allow user code to refer to enum type of a specific field'''
         result = ''
@@ -1991,6 +2014,11 @@ class ProtoFile:
             yield '/* Struct field encoding specification for nanopb */\n'
             for msg in self.messages:
                 yield msg.fields_declaration(self.dependencies) + '\n'
+
+                # huaguoqing add,2022.12.10
+                yield '#ifdef PB_SUPPORT_JSON \n'
+                yield msg.fields_name_declaration(self.dependencies) + '\n'
+                yield '#endif \n'
             for msg in self.messages:
                 yield 'extern const pb_msgdesc_t %s_msg;\n' % Globals.naming_style.type_name(msg.name)
             yield '\n'
