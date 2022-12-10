@@ -325,7 +325,7 @@ struct pb_msgdesc_s {
     pb_size_t largest_tag;
 
 #ifdef PB_SUPPORT_JSON    
-    /*huaguoqing add,2022.1010*/
+    /*huaguoqing add,2022.12.10*/
     const char * const * field_name_info;
     const char *name;
 #endif    

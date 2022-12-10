@@ -1479,7 +1479,7 @@ class Message(ProtoElement):
 
         return result
 
-	#huaguoqing add,2022.10.10 for nanopb2json
+	#huaguoqing add,2022.12.10 for nanopb2json
     def fields_name_declaration(self, dependencies):
         '''Return X-macro declaration of all fields in this message.'''
         Field.macro_x_param = 'X'
