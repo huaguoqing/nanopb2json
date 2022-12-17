@@ -128,7 +128,7 @@ typedef struct {
 
 ### 2. 定义结构体的属性描述表。
 
-####2.1 方法1：使用以下宏定义描述结构体属性。
+#### 2.1 方法1：使用以下宏定义描述结构体属性。
 - _property_int(type, field) 
 - _property_real(type, field)
 - _property_bool(type, field)
