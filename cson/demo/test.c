@@ -96,8 +96,6 @@
  *
  */
 
-#define USING_NO_CSON_REF_TBL
-
 /*
     Step2:定义数据结构的反射表
 */

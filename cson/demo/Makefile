@@ -7,7 +7,7 @@ CSON_C := ../script/cson-c.sh
 
 CFLAGS :=  $(INC) -Wno-int-conversion
 CFLAGS += -g 
-#CFLAGS += USING_NO_CSON_REF_TBL    
+CFLAGS += -DUSING_NO_CSON_REF_TBL    
 
 LDFLAGS := $(LIB_PATH) -lcson -ljansson
 

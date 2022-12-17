@@ -8,6 +8,7 @@
 #    if want to check the macro preprocess result, plese run cmd like this:   
 #           gcc -E -I ../inc/ test2.h.cson_ref_tbl.c -o  test2.h.cson_ref_tbl.s; cat test2.h.cson_ref_tbl.s | grep -v ^# > test2.h.cson_ref_tbl.S
 # @author: huaguoqing
+# @gitee ：https://gitee.com/huaguoqing
 # @data  : 2022.12.17
 #####################################
 usage()
