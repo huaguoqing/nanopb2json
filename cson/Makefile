@@ -27,17 +27,19 @@ OBJS += $(patsubst $(ADP_SRC_DIR)/%.c, $(OUT_DIR)/%.o, $(ADP_SRC_FILES))
 INC_PATH += -I./inc/
 INC_PATH += -I./3rd/inc/
 
+CFLAGS :=  
+CFLAGS += -g 
 $(TARGET):$(OBJS)
 	@$(MD) $(OUT_DIR)
 	@$(AR) rc $(TARGET) $(OBJS)
 
 $(OUT_DIR)/%.o:$(SRC_DIR)/%.c
 	@$(MD) $(OUT_DIR)
-	@$(CC) $(INC_PATH) -c $< -o $@
+	@$(CC) $(INC_PATH) $(CFLAGS) -c $< -o $@
 
 $(OUT_DIR)/%.o:$(ADP_SRC_DIR)/%.c
 	@$(MD) $(OUT_DIR)
-	@$(CC) $(INC_PATH) -c $< -o $@
+	@$(CC) $(INC_PATH) $(CFLAGS) -c $< -o $@
 
 .PHONY:clean
 clean:

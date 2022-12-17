@@ -7,35 +7,12 @@
 #include "assert.h"
 #include "math.h"
 
+#include "test2.h"
+#include "test2.h.cson_ref_tbl.h"
+
 #define CHECK_STRING(a, b)  assert(strcmp(a, b) == 0)
 #define CHECK_NUMBER(a, b)  assert(a == b)
 #define CHECK_REAL(a, b)    assert(fabs(a-b) <= 1e-6)
-
-typedef struct {
-    char*       name;
-    char*       jump_url;
-} ClassInfoChild;
-
-typedef struct {
-    int         has_child;
-    char*       icon;
-    int         id;
-    char*       name;
-    char        childrenNum;
-    ClassInfoChild*     children;
-} ClassInfo;
-
-typedef struct {
-    long long   timestamp;
-    int      infoNum;
-    ClassInfo*  info;
-} Data;
-
-typedef struct {
-    int         status;
-    Data        data;
-    int         errcode;
-} Response;
 
 reflect_item_t  ClassInfoChildTbl[] = {
     _property_string(ClassInfoChild, name),
@@ -83,7 +60,11 @@ void test2()
     memset(&resp, 0, sizeof(resp));
 
     /* string to struct */
+#ifdef USING_NO_CSON_REF_TBL       
     int ret = csonJsonStr2Struct(jStr, &resp, ResponseTbl);
+#else 
+    int ret = csonJsonStr2Struct(jStr, &resp, cson_ref_tbl_Response);
+#endif
     printf("decode ret=%d\n", ret);
     CHECK_NUMBER(ret, 0);
 
@@ -91,7 +72,11 @@ void test2()
     //csonPrintProperty(&resp, ResponseTbl);
 
     char* jstrOutput;
+#ifdef USING_NO_CSON_REF_TBL          
     ret = csonStruct2JsonStr(&jstrOutput, &resp, ResponseTbl);
+#else
+    ret = csonStruct2JsonStr(&jstrOutput, &resp, cson_ref_tbl_Response);
+#endif
     CHECK_NUMBER(ret, 0);
     printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
@@ -99,8 +84,12 @@ void test2()
     checkResult(&resp, jstrOutput);
 
     free(jstrOutput);
-    csonFreePointer(&resp, ResponseTbl);
 
+#ifdef USING_NO_CSON_REF_TBL   
+    csonFreePointer(&resp, ResponseTbl);
+#else
+    csonFreePointer(&resp, cson_ref_tbl_Response);
+#endif
     printf("Successed %s.\n", __FUNCTION__);
 }
 

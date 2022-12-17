@@ -9,31 +9,6 @@
 #include "limits.h"
 #include "string.h"
 
-extern cson_interface csomImpl;
-
-#define cson_object_get csomImpl.cson_object_get
-#define cson_typeof csomImpl.cson_typeof
-#define cson_loadb csomImpl.cson_loadb
-#define cson_decref csomImpl.cson_decref
-#define cson_string_value csomImpl.cson_string_value
-#define cson_string_length csomImpl.cson_string_length
-#define cson_integer_value csomImpl.cson_integer_value
-#define cson_real_value csomImpl.cson_real_value
-#define cson_bool_value csomImpl.cson_bool_value
-#define cson_array_size csomImpl.cson_array_size
-#define cson_array_get csomImpl.cson_array_get
-#define cson_object csomImpl.cson_object
-#define cson_to_string csomImpl.cson_to_string
-#define cson_integer csomImpl.cson_integer
-#define cson_string csomImpl.cson_string
-#define cson_bool csomImpl.cson_bool
-#define cson_real csomImpl.cson_real
-#define cson_array csomImpl.cson_array
-#define cson_array_add csomImpl.cson_array_add
-#define cson_object_set_new csomImpl.cson_object_set_new
-#define cson_is_number(type) (type == CSON_REAL || type == CSON_INTEGER)
-#define cson_is_bool(type)    (type == CSON_TRUE || type == CSON_FALSE)
-
 const reflect_item_t integerReflectTbl[] = {
     {"0Integer", 0, sizeof(int), CSON_INTEGER, NULL, 0, NULL, 1},
     {}

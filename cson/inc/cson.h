@@ -84,6 +84,32 @@ typedef struct {
     func_cson_object_set_new cson_object_set_new;
 } cson_interface;
 
+extern cson_interface csomImpl;
+
+#define cson_object_get csomImpl.cson_object_get
+#define cson_typeof csomImpl.cson_typeof
+#define cson_loadb csomImpl.cson_loadb
+#define cson_decref csomImpl.cson_decref
+#define cson_string_value csomImpl.cson_string_value
+#define cson_string_length csomImpl.cson_string_length
+#define cson_integer_value csomImpl.cson_integer_value
+#define cson_real_value csomImpl.cson_real_value
+#define cson_bool_value csomImpl.cson_bool_value
+#define cson_array_size csomImpl.cson_array_size
+#define cson_array_get csomImpl.cson_array_get
+#define cson_object csomImpl.cson_object
+#define cson_to_string csomImpl.cson_to_string
+#define cson_integer csomImpl.cson_integer
+#define cson_string csomImpl.cson_string
+#define cson_bool csomImpl.cson_bool
+#define cson_real csomImpl.cson_real
+#define cson_array csomImpl.cson_array
+#define cson_array_add csomImpl.cson_array_add
+#define cson_object_set_new csomImpl.cson_object_set_new
+#define cson_is_number(type) (type == CSON_REAL || type == CSON_INTEGER)
+#define cson_is_bool(type)    (type == CSON_TRUE || type == CSON_FALSE)
+
+
 /**
  * @brief the description of property in struct.
  *
@@ -160,6 +186,8 @@ extern const reflect_item_t realReflectTbl[];
  *
  */
 #define _property_obj(type, field, tbl)                                     _property(type, field, CSON_OBJECT, tbl, _ex_args_nullable)
+//huaguoqing add,2022.11.17
+#define _property_object(type, field, tbl)                                  _property_obj(type, field, tbl)
 
 /**
  * @brief Declaring array properties.
@@ -177,6 +205,14 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_array_string(type, field, subType, count)                 _property_array(type, field, stringReflectTbl, subType, count)
 #define _property_array_real(type, field, subType, count)                   _property_array(type, field, realReflectTbl, subType, count)
 #define _property_array_bool(type, field, subType, count)                   _property_array(type, field, boolReflectTbl, subType, count)
+
+//huaguoqing add,2022.12.17
+#define _property_array_x_object(type, field, tbl, subType, count)            _property_array(type, field, tbl, subType, count)
+#define _property_array_x_int(type, field, tbl,subType, count)                _property_array(type, field, integerReflectTbl, subType, count)
+#define _property_array_x_string(type, field, tbl,subType, count)             _property_array(type, field, stringReflectTbl, subType, count)
+#define _property_array_x_real(type, field, tbl,subType, count)               _property_array(type, field, realReflectTbl, subType, count)
+#define _property_array_x_bool(type, field, tbl,subType, count)               _property_array(type, field, boolReflectTbl, subType, count)
+
 
 /**
  * @brief nonull definitions. parser will stop and return error code when field not found which declared whit it.
@@ -212,6 +248,26 @@ extern const reflect_item_t realReflectTbl[];
 #define _property_array_string_ex(type, field, subType, count, args)        _property_array_ex(type, field, stringReflectTbl, subType, count)
 #define _property_array_real_ex(type, field, subType, count, args)          _property_array_ex(type, field, realReflectTbl, subType, count)
 #define _property_array_bool_ex(type, field, subType, count, args)          _property_array_ex(type, field, boolReflectTbl, subType, count)
+
+//huaguoqing add,2022.12.17
+#define CSON_REF_START(CSON_REF_name)   \
+    reflect_item_t cson_ref_tbl_##CSON_REF_name[] = {
+
+#define CSON_REF(CSON_REF_field,CSON_REF_type) \
+        _property_##CSON_REF_type(CSON_REF_NAME,CSON_REF_field),
+
+#define CSON_REF_O(CSON_REF_field,CSON_REF_st_type) \
+        _property_object(CSON_REF_NAME, CSON_REF_field, cson_ref_tbl_##CSON_REF_st_type),
+
+#define CSON_REF_AN(CSON_REF_field) \
+        _property_int_ex(CSON_REF_NAME, CSON_REF_field, _ex_args_all),
+
+#define CSON_REF_A(CSON_REF_field,CSON_REF_type,CSON_REF_st_type,CSON_REF_st_num) \
+        _property_array_x_##CSON_REF_type(CSON_REF_NAME, CSON_REF_field, cson_ref_tbl_##CSON_REF_st_type, CSON_REF_st_type, CSON_REF_st_num),
+
+#define CSON_REF_END()  \
+        _property_end()\
+    };
 
 /**
  * @brief function type of csonLoopProperty.

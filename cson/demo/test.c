@@ -6,6 +6,9 @@
 #include "assert.h"
 #include "math.h"
 
+#include "test.h"
+#include "test.h.cson_ref_tbl.h"
+
 #define CHECK_STRING(a, b)  assert(strcmp(a, b) == 0)
 #define CHECK_NUMBER(a, b)  assert(a == b)
 #define CHECK_REAL(a, b)    assert(fabs(a-b) <= 1e-6)
@@ -93,43 +96,7 @@
  *
  */
 
-
-/*
-    Step1:定义与json相对应的数据结构
-*/
-typedef struct {
-    int         time;
-    char*       text;
-} Lyric;
-
-typedef struct {
-    char*       songName;
-    char*       signerName;
-    char*       albumName;
-    char*       url;
-    int         duration;
-    int         paid;
-    double      price;
-    size_t      lyricNum;
-    Lyric*      lyric;
-    size_t      keyNum;
-    int*        key;
-    size_t      strNum;
-    char**      strList;
-} SongInfo;
-
-typedef struct {
-    int         a;
-    double      b;
-} ExtData;
-
-typedef struct {
-    char*       name;
-    char*       creater;
-    size_t      songNum;
-    SongInfo*   songList;
-    ExtData     extData;
-} PlayList;
+#define USING_NO_CSON_REF_TBL
 
 /*
     Step2:定义数据结构的反射表
@@ -190,14 +157,22 @@ void test1()
     memset(&playList, 0, sizeof(playList));
 
     /* string to struct */
+#ifdef USING_NO_CSON_REF_TBL    
     int ret = csonJsonStr2Struct(jStr, &playList, play_list_ref_tbl);
+#else    
+    int ret = csonJsonStr2Struct(jStr, &playList, cson_ref_tbl_PlayList);
+#endif    
     CHECK_NUMBER(ret, 0);
     printf("decode ret=%d\n", ret);
     /* test print */
     //csonPrintProperty(&playList, play_list_ref_tbl);
 
     char* jstrOutput;
+#ifdef USING_NO_CSON_REF_TBL        
     ret = csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
+#else    
+    ret = csonStruct2JsonStr(&jstrOutput, &playList, cson_ref_tbl_PlayList);    
+#endif    
     CHECK_NUMBER(ret, 0);
     printf("encode ret=%d\nJson:%s\n", ret, jstrOutput);
 
@@ -205,8 +180,11 @@ void test1()
     checkResult(&playList, jstrOutput);
 
     free(jstrOutput);
+#ifdef USING_NO_CSON_REF_TBL       
     csonFreePointer(&playList, play_list_ref_tbl);
-    
+#else
+    csonFreePointer(&playList, cson_ref_tbl_PlayList);        
+#endif   
     printf("Successed %s.\n", __FUNCTION__);
 }
 
