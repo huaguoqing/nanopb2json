@@ -127,7 +127,8 @@ typedef struct {
 ```
 
 ### 2. 定义结构体的属性描述表。
-使用以下宏定义描述结构体属性。
+
+####2.1 方法1：使用以下宏定义描述结构体属性。
 - _property_int(type, field) 
 - _property_real(type, field)
 - _property_bool(type, field)
@@ -205,16 +206,173 @@ reflect_item_t play_list_ref_tbl[] = {
 };
 ```
 
+#### 2.2 方法2 通过注解方式，自动生成反射表
+注解方法的好处是它是直接在c结构上进行声明，方便对照，不易出错。
+
+注解方法：  
+- @CSON_REF_START(CSON_REF_name)                  结构体注释开始  
+- @CSON_REF(CSON_REF_field,CSON_REF_type)         结构体基本类型字段的注解声明  
+- @CSON_REF_O(CSON_REF_field,CSON_REF_st_type)    结构体对象类型字段的注解声明   
+- @CSON_REF_AN(CSON_REF_field)                    结构体数组字段大小的注解声明  
+- @CSON_REF_A(CSON_REF_field,CSON_REF_type,CSON_REF_st_type,CSON_REF_st_num)  
+                                                结构体数组字段的注释声明  
+- @CSON_REF_END()                                 结构体注释结束  
+
+    宏参数说明  
+    CSON_REF_name           c结构体名字  
+    CSON_REF_field          c结构体内的字段名  
+    CSON_REF_type           c结构体字段对应的cson类型  
+    CSON_REF_st_type        c结构体字段的c类型  
+    CSON_REF_st_num         数组大小字段名  
+
+举例：demo/test.h
+
+```  
+/*
+    Step1:定义与json相对应的数据结构
+*/
+typedef struct {            //@CSON_REF_START(Lyric)
+    int         time;       //@CSON_REF(time,int)
+    char*       text;       //@CSON_REF(text,string)
+} Lyric;                    //@CSON_REF_END()
+
+typedef struct {                            //@CSON_REF_START(SongInfo)
+    char*       songName;                   //@CSON_REF(songName,string)
+    char*       signerName;                 //@CSON_REF(signerName,string)
+    char*       albumName;                  //@CSON_REF(albumName,string)
+    char*       url;                        //@CSON_REF(url,string)
+    int         duration;                   //@CSON_REF(duration,int)
+    int         paid;                       //@CSON_REF(paid,int)
+    double      price;                      //@CSON_REF(price,real)
+    size_t      lyricNum;                   //@CSON_REF_AN(lyricNum)
+    Lyric*      lyric;                      //@CSON_REF_A(lyric,object,Lyric,lyricNum)
+    size_t      keyNum;                     //@CSON_REF_AN(keyNum)
+    int*        key;                        //@CSON_REF_A(key,int,int,keyNum)
+    size_t      strNum;                     //@CSON_REF_AN(strNum)
+    char**      strList;                    //@CSON_REF_A(strList,string,char*,strNum)
+} SongInfo;                                 //@CSON_REF_END()
+
+typedef struct {                            //@CSON_REF_START(ExtData)
+    int         a;                          //@CSON_REF(a,int)
+    double      b;                          //@CSON_REF(b,real)
+} ExtData;                                  //@CSON_REF_END()
+
+typedef struct {                            //@CSON_REF_START(PlayList)
+    char*       name;                       //@CSON_REF(name,string)
+    char*       creater;                    //@CSON_REF(creater,string)
+    size_t      songNum;                    //@CSON_REF_AN(songNum)
+    SongInfo*   songList;                   //@CSON_REF_A(songList,object,SongInfo,songNum)
+    ExtData     extData;                    //@CSON_REF_O(extData,ExtData)
+} PlayList;                                 //@CSON_REF_END()
+
+```  
+
+生成C代码的反射表  
+
+以demo/test.h为例
+- 进入demo/ 目录
+- 编译test.h  
+```
+    ../script/cson-c.sh test.h
+```
+
+则生成 test.h.cson_ref_tbl.c test.h.cson_ref_tbl.h  
+即在输入的头文件之后，加后缀 .cson_ref_tbl.c .cson_ref_tbl.h  
+
+test.h.cson_ref_tbl.h如下:  
+  里面便是生成的c结构的反射表变量的声明了。
+  反射表名以 cson_ref_tbl_XXX 形式定义。
+```  
+    /**
+    * @file test.h.cson_ref_tbl.h 
+    *   !!!AUTO GENERTAED BY ../script/cson-c.sh, DON'T EDIT
+    *   define the cson reflect table for c structure.
+    *   src_file:test.h
+    * @date   2022-12-17
+    */
+    #ifndef __TEST_H_CSON_REF_TBL_H__
+    #define __TEST_H_CSON_REF_TBL_H__
+    #include "cson.h"
+
+    extern reflect_item_t cson_ref_tbl_Lyric[];
+    extern reflect_item_t cson_ref_tbl_SongInfo[];
+    extern reflect_item_t cson_ref_tbl_ExtData[];
+    extern reflect_item_t cson_ref_tbl_PlayList[];
+
+    #endif
+```
+
+test.h.cson_ref_tbl.c如下：
+
+```
+    /**
+    * @file test.h.cson_ref_tbl.c 
+    *   !!!AUTO GENERTAED BY ../script/cson-c.sh, DON'T EDIT
+    *   define the cson reflect table for c structure.
+    *   src_file:test.h
+    * @date   2022-12-17
+    */
+
+    #include "cson.h"
+    #include "test.h"
+    #include "test.h.cson_ref_tbl.h"
+
+    #undef CSON_REF_NAME
+    #define CSON_REF_NAME Lyric
+    CSON_REF_START(Lyric)
+    CSON_REF(time,int)
+    CSON_REF(text,string)
+    CSON_REF_END()
+    #undef CSON_REF_NAME
+    #define CSON_REF_NAME SongInfo
+    CSON_REF_START(SongInfo)
+    CSON_REF(songName,string)
+    CSON_REF(signerName,string)
+    CSON_REF(albumName,string)
+    CSON_REF(url,string)
+    CSON_REF(duration,int)
+    CSON_REF(paid,int)
+    CSON_REF(price,real)
+    CSON_REF_AN(lyricNum)
+    CSON_REF_A(lyric,object,Lyric,lyricNum)
+    CSON_REF_AN(keyNum)
+    CSON_REF_A(key,int,int,keyNum)
+    CSON_REF_AN(strNum)
+    CSON_REF_A(strList,string,char*,strNum)
+    CSON_REF_END()
+    #undef CSON_REF_NAME
+    #define CSON_REF_NAME ExtData
+    CSON_REF_START(ExtData)
+    CSON_REF(a,int)
+    CSON_REF(b,real)
+    CSON_REF_END()
+    #undef CSON_REF_NAME
+    #define CSON_REF_NAME PlayList
+    CSON_REF_START(PlayList)
+    CSON_REF(name,string)
+    CSON_REF(creater,string)
+    CSON_REF_AN(songNum)
+    CSON_REF_A(songList,object,SongInfo,songNum)
+    CSON_REF_O(extData,ExtData)
+    CSON_REF_END()
+
+```
+
+- 将生成的test.h.cson_ref_tbl.c test.h.cson_ref_tbl.h加入makefile,即可使用。
+
+
 ### 3. 调用cson接口编解码Json。
 ``` c
 PlayList playList;
 
 /* Decode */
 csonJsonStr2Struct(jStr, &playList, play_list_ref_tbl);
+如果是注解方式定义的，则反射变量使用cson_ref_tbl_PlayList  
 
 /* Encode */
 char* jstrOutput;
-csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);
+csonStruct2JsonStr(&jstrOutput, &playList, play_list_ref_tbl);  
+如果是注解方式定义的，则反射变量使用cson_ref_tbl_PlayList
 ```
 
 ## 限制
